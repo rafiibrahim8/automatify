@@ -8,10 +8,13 @@ import threading
 
 app = Flask(__name__)
 
-def sendMessage(text, uid):
+def sendMessage(text, psid):
     json = {
-        'recipient': { 'id': uid },
-        'message': 'Hello world',
+        "messaging_type": "UPDATE",
+        "recipient":{"id": psid},
+        "message":{
+            "text": "hello, world!"
+            }
         }
     params =  { 'access_token': os.environ['FB_PAGE_ACCESS_TOKEN'] }
     res = requests.post('https://graph.facebook.com/v8.0/me/messages', params=params, json=json)
