@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request as f_req
 from automatify_service_handler import handle_service
 import os
+import json
 import requests
 import threading
 
@@ -49,9 +50,13 @@ def fb_hook_verify():
 
 @app.route('/fb-webhook', methods = ['POST'])
 def fb_hook_post():
-    print('XXX', f_req.form)
-    if(f_req.form.get('object', None) == 'page'):
-        t = threading.Thread(target=manage_hook_post,args=(f_req.form.get('entry',{}),))
+    json_data = f_req.get_json()
+    # if(f_req.data):
+    #     json_data = json.loads(f_req.data)
+    #     print(json_data,)
+    print('XXX', json_data)
+    if(json_data.get('object', None) == 'page'):
+        t = threading.Thread(target=manage_hook_post,args=(json_data.get('entry',{}),))
         t.start()
         return 'received'
     else:
