@@ -32,6 +32,8 @@ def format_msg(info):
 
     for p in info['packs']:
         remaining = p['total'] - p['usage']
+        if(int(remaining) == 0):
+            continue
         percent = remaining*100/p['total']
         validity = p['validity'].split('T')[0] + ' ' + p['validity'].split('T')[1][:5]
 
