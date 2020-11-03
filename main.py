@@ -49,12 +49,14 @@ def fb_hook_verify():
 
 @app.route('/fb-webhook', methods = ['POST'])
 def fb_hook_post():
-    if(f_req.form['object'] == 'page'):
-        t = threading.Thread(target=get_data_uses,args=(f_req.form['entry'],))
+    print('XXX', f_req.form)
+    if(f_req.form.get('object', None) == 'page'):
+        t = threading.Thread(target=manage_hook_post,args=(f_req.form.get('entry',{}),))
         t.start()
         return 'received'
     else:
         return '404 - Not Found', 404
+    return 'ok'
 
   
 
