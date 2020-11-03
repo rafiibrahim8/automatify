@@ -11,7 +11,7 @@ app = Flask(__name__)
 def sendMessage(text, uid):
     json = {
         'recipient': { 'id': uid },
-        'message': {text},
+        'message': 'Hello world',
         }
     params =  { 'access_token': os.environ['FB_PAGE_ACCESS_TOKEN'] }
     res = requests.post('https://graph.facebook.com/v8.0/me/messages', params=params, json=json)
