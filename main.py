@@ -8,25 +8,30 @@ import threading
 
 app = Flask(__name__)
 
-def sendMessage(text, psid):
+def sendMessage(text):
     json = {
         "messaging_type": "UPDATE",
-        "recipient":{"id": psid},
+        "recipient":{"id": os.environ['MY_PSID']},
         "message":{
-            "text": "hello, world!"
+            "text": text
             }
         }
     params =  { 'access_token': os.environ['FB_PAGE_ACCESS_TOKEN'] }
-    res = requests.post('https://graph.facebook.com/v8.0/me/messages', params=params, json=json)
-    print(res.text)
+
+    try:
+        res = requests.post('https://graph.facebook.com/v8.0/me/messages', params=params, json=json)
+        print(res.text)
+    except:
+        pass
 
 def manage_hook_post(data):
     for d in data:
         for i in d['messaging']:
-            if (i['message'] and i['message']['text']):
-                res = handle_service(i['message']['text'])
-                if(res != None):
-                    sendMessage(res, i['sender']['id'])
+            try:
+                if (i['message'] and i['message']['text'] and i['sender']['id'] == os.environ['MY_PSID']):
+                    sendMessage(handle_service(i['message']['text']))
+            except:
+                break
 
 
 @app.route("/")
@@ -54,19 +59,13 @@ def fb_hook_verify():
 @app.route('/fb-webhook', methods = ['POST'])
 def fb_hook_post():
     json_data = f_req.get_json()
-    # if(f_req.data):
-    #     json_data = json.loads(f_req.data)
-    #     print(json_data,)
-    print('XXX', json_data)
+    print('Received:',json_data)
     if(json_data.get('object', None) == 'page'):
         t = threading.Thread(target=manage_hook_post,args=(json_data.get('entry',{}),))
         t.start()
         return 'received'
     else:
         return '404 - Not Found', 404
-    return 'ok'
-
-  
 
 
 if __name__ == "__main__":
