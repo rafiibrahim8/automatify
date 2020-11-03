@@ -1,3 +1,4 @@
 .vscode
 test.py
 t.js
+__pycache__
