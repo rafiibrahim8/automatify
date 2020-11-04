@@ -72,9 +72,9 @@ def fb_hook_post():
 @app.route('/adata-corn', methods = ['GET'])
 def adata_corn():
     res = do_corn()
-    if(res != None):
-        sendMessage(res,'UPDATE')
-    return 'Corn Done :)'
+    if(res[0] == 1):
+        sendMessage(res[1],'UPDATE')
+    return res[1]
 
 if __name__ == "__main__":
     app.run()

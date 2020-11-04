@@ -3,7 +3,6 @@ import os
 
 session = None
 data_warn = False
-WARN_DATA_LOW = 200.0 #MB
 
 def init_session():
     global session
@@ -23,7 +22,10 @@ def get_raw_res():
         print('Someting went wrong.')
 
 def format_msg(info):
-    remaining = info['total'] - info['usage']
+    try:
+        remaining = info['total'] - info['usage']
+    except:
+        return None
     percent = remaining*100/info['total']
 
     msg = 'Overall: {} MB\n'.format(info['total']) + \
@@ -49,19 +51,24 @@ def format_msg(info):
 def get_detail_text(res=None):
     if(res == None):
         res = get_raw_res()
+    res = format_msg(res)
     if(res == None):
-        return 'Someting went wrong.'
-    return format_msg(res)
+        return 'Someting went wrong. Maybe logged out.'
+    return res
 
 
 def do_corn():
     global data_warn
     info = get_raw_res()
-    remaining = info['total'] - info['usage']
-    if(remaining < WARN_DATA_LOW):
+    try:
+        remaining = float(info['total'] - info['usage'])
+    except:
+        print('Logged out.')
+        return (2, 'Logged out')
+    if(remaining < float(os.environ['AIRTEL_WARN_DATA_LOW'])):
         if(not data_warn):
             data_warn = True
-            return 'Your data pack is about to finish.\n\n' + get_detail_text(info)
+            return (1, 'Your data pack is about to finish.\n\n' + get_detail_text(info))
     else:
         data_warn = False
-        return None
+        return (0, 'Corn Done :)')
