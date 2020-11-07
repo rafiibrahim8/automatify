@@ -4,7 +4,6 @@ from automatify_service_handler import handle_service
 from adata import do_corn
 
 import os
-import json
 import requests
 import threading
 

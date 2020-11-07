@@ -1,6 +1,8 @@
 from requests import Session
 import os
 
+WARN_DATA_LOW = 512.0
+
 session = None
 data_warn = False
 
@@ -30,7 +32,7 @@ def format_msg(info):
 
     msg = 'Overall: {} MB\n'.format(info['total']) + \
         'Used: {} MB\n'.format(info['usage']) + \
-        'Remaining: {} MB ({:.2f}%)\n\n'.format(remaining,percent)
+        'Remaining: {:.2f} MB ({:.2f}%)\n\n'.format(remaining,percent)
 
     for p in info['packs']:
         remaining = p['total'] - p['usage']
@@ -42,7 +44,7 @@ def format_msg(info):
         m = 'Pack: {}\n'.format(p['title']) + \
             'Total: {} MB\n'.format(p['total']) + \
             'Used: {} MB\n'.format(p['usage']) + \
-            'Remaining: {} MB ({:.2f}%)\n'.format(remaining,percent) + \
+            'Remaining: {:.2f} MB ({:.2f}%)\n'.format(remaining,percent) + \
             'Validity: {}\n\n'.format(validity)
         msg += m
     
@@ -65,7 +67,7 @@ def do_corn():
     except:
         print('Logged out.')
         return (2, 'Logged out')
-    if(remaining < float(os.environ['AIRTEL_WARN_DATA_LOW'])):
+    if(remaining < float(os.environ.get('AIRTEL_WARN_DATA_LOW', WARN_DATA_LOW))):
         if(not data_warn):
             data_warn = True
             return (1, 'Your data pack is about to finish.\n\n' + get_detail_text(info))
