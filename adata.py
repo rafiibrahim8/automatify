@@ -97,10 +97,11 @@ def get_raw_res(retry=True):
         return res.json()['data']['internetInfo']
     except:
         if(retry):
+            print('Raw Data: Fetch failed. Trying again...')
             airtel_auth_session = genarate_token()
             return get_raw_res(False)
         else:
-            print('Someting went wrong.')
+            print('Raw Data: Someting went wrong.')
             return
 
 def format_msg(info):
