@@ -1,3 +1,4 @@
+from traceback import format_exc
 from requests import Session
 from hashlib import sha1
 from base64 import b64decode
@@ -17,11 +18,21 @@ session = None
 data_warn = False
 airtel_auth_session = None
 
+def getcookie():
+    try:
+        return loads(b64decode(os.environ['FB_COOKIES_B64'].encode()))
+    except KeyError:
+        try:
+            with open('cookie.txt','rb') as f:
+                return loads(b64decode(f.read()))
+        except:
+            return None
+
 def init_session():
     global session
     if(session == None):
         session = Session()
-        fb_cookies = loads(b64decode(os.environ['FB_COOKIES_B64'].encode()))
+        fb_cookies = getcookie()
         for c in fb_cookies:
             session.cookies.set(c, fb_cookies[c])
         session.headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/82.0'}
@@ -54,7 +65,7 @@ def genarate_token():
         
         oauth_response = session.get(OAUTH_URL, params=oauth_params).text
         access_token= findall('access_token=([^&]+)', oauth_response).pop()
-
+        print(access_token)
         graph_params = {
             'access_token': access_token,
             'fields':'name,email,picture',
@@ -86,7 +97,7 @@ def genarate_token():
         token = session.post(AIRTEL_LOGIN_URL, headers=airtel_headers, json=airtel_json).json().get('data').get('token')
         return token
     except:
-        return
+        print(format_exc())
 
 def get_raw_res(retry=True):
     global airtel_auth_session
