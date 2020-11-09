@@ -8,6 +8,11 @@ import requests
 import threading
 
 app = Flask(__name__)
+def printIP():
+    try:
+        print('Server IP:',requests.get('https://ifconfig.me').text)
+    except:
+        print('Can not get server IP.')
 
 def sendMessage(text, msg_type='RESPONSE'):
     json = {
@@ -74,6 +79,8 @@ def adata_corn():
     if(res[0] == 1):
         sendMessage(res[1],'UPDATE')
     return res[1]
+
+threading.Thread(target=printIP).start()
 
 if __name__ == "__main__":
     app.run()

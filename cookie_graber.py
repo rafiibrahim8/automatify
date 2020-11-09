@@ -4,10 +4,17 @@ import json
 import base64
 import browser_cookie3
 
+required_cookie = ['c_user', 'datr', 'fr', 'sb', 'xs']
+cookies = browser_cookie3.Firefox(domain_name='facebook.com').load()
 d = dict()
 
-for c in browser_cookie3.Firefox(domain_name='facebook.com').load():
-    d[c.name] =  c.value
+for c in required_cookie:
+    d[c] =  cookies[c]
 
-print(base64.b64encode(json.dumps(d).encode()).decode())
-
+cookie_b64 = base64.b64encode(json.dumps(d).encode()).decode()
+print(cookie_b64)
+try:
+    with open('cookie.txt','r') as f:
+        f.write(cookie_b64)
+except:
+    print('File saving failed.')
