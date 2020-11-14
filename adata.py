@@ -65,7 +65,7 @@ def genarate_token():
         
         oauth_response = session.get(OAUTH_URL, params=oauth_params).text
         access_token= findall('access_token=([^&]+)', oauth_response).pop()
-        print(access_token)
+        
         graph_params = {
             'access_token': access_token,
             'fields':'name,email,picture',
@@ -87,8 +87,9 @@ def genarate_token():
             'provider':'facebook'
         }
 
-        airtel_website_session =  session.get(AIRTEL_LOGIN_DASHBOARD_URL).cookies['airtel_website_session']
-
+        session.get(AIRTEL_LOGIN_DASHBOARD_URL) # fetch 'airtel_website_session' cookies if not present.
+        airtel_website_session = session.cookies.get_dict()['airtel_website_session']
+        
         airtel_headers = {
             'X-CSRF-TOKEN': airtel_website_session,
             'Authorization':'Bearer ' + airtel_website_session
@@ -164,4 +165,4 @@ def do_corn():
             return (1, 'Your data pack is about to finish.\n\n' + get_detail_text(info))
     else:
         data_warn = False
-        return (0, 'Corn Done :)')
+        return (0, 'Corn Done :)\r\n')
