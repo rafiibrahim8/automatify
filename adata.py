@@ -104,6 +104,8 @@ def do_corn():
         if(not data_warn):
             data_warn = True
             return (1, 'Your data pack is about to finish.\n\n' + get_detail_text(info))
+        else:
+            return (0, 'Corn Done :)\r\n')
     else:
         data_warn = False
         return (0, 'Corn Done :)\r\n')
