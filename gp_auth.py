@@ -68,7 +68,7 @@ def get_gpinfo():
     }
     session.post('https://signin.gp-id.com/id/api/notification',data=data) #no idea what it does
 
-    pin = input('PIN: ')
+    pin = input('PIN: ').strip()
 
     data = {
         'pin':int(pin),
