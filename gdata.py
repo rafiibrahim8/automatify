@@ -50,7 +50,15 @@ def update_tokens():
     res = post('https://mygp.grameenphone.com/mygpapi/v2/oauth/connectid/refresh-token/android', headers=headers, json=json_, params=params_common)
     
     if(res.status_code == 200):
-        gpinfo.update(res.json())
+        json_ = res.json()
+        try:
+            _ = json_['error']
+            print('Error: Token update failed.')
+            print(res.text)
+            return
+        except:
+            pass
+        gpinfo.update(json_)
         result = Jsons.query.filter_by(name='gpinfo').first()
         if(not result):
             db.session.add(Jsons(name='gpinfo', jdata=dumps(gpinfo)))
@@ -58,7 +66,7 @@ def update_tokens():
             result.jdata = dumps(gpinfo)
         db.session.commit()
     else:
-        print('Token update failed.')
+        print('Token update failed. Code:', res.status_code)
         print(res.text)
 
 def validate_tokens():
