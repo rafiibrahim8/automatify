@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request as f_req
+from utils import db
 from automatify_service_handler import handle_service
 from adata import do_corn
 
@@ -8,6 +9,13 @@ import requests
 import threading
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+
 def printIP():
     try:
         print('Server IP:',requests.get('https://ifconfig.me').text)
@@ -73,8 +81,8 @@ def fb_hook_post():
     else:
         return '404 - Not Found', 404
 
-@app.route('/adata-corn', methods = ['GET'])
-def adata_corn():
+@app.route('/corn', methods = ['GET'])
+def corn_func():
     res = do_corn()
     if(res[0] == 1):
         sendMessage(res[1],'UPDATE')
@@ -82,5 +90,5 @@ def adata_corn():
 
 threading.Thread(target=printIP).start()
 
-if __name__ == "__main__":
-    app.run()
+# run using: flask run
+

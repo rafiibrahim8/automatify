@@ -94,7 +94,7 @@ def get_gpinfo():
     gpinfo = requests.post('https://mygp.grameenphone.com/mygpapi/v2/oauth/connectid/get-token/android',json=json_,headers=headers,params=params).json()
 
     # will get like:
-    # {"access_token":"7b4d97ddddddddddb298f70e","refresh_token":"ddcdddddddddddd9e5c512d0ee","expire_at":1605766713,"is_primary":1,"id":"4133310","email":""}
+    # {"access_token":"7b4d97ddddddddddb298f70e","refresh_token":"ddcdddddddddddd9e5c512d0ee","expire_at":1605766713,"is_primary":1,"id":"000000","email":""}
 
     me_ua = genID()
 
