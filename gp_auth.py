@@ -1,18 +1,49 @@
 #Run on your local machine
 
-import requests
+from Crypto.Hash import SHA256
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.PublicKey import RSA
+
 from requests.exceptions import InvalidSchema
 from hashlib import sha1
 from random import random
 from base64 import b64encode
+from click import confirm
+import requests
 import json
 import re
 
 PHONE_NO = '01XXXXXXXXXX'
+APP_URL = 'https://automatify.herokuapp.com'
 
 def genID():
     s1s = sha1(str(random()).encode('utf-8')).hexdigest()
     return s1s[:8] + '-' + s1s[8:12] + '-' + s1s[12:16] + '-' + s1s[16:20] + '-' + s1s[20:32]
+
+def upload_to_server(content):
+    instructions = {
+        'table':'jsons',
+        'name':'gpinfo',
+        'content': content
+    }
+
+    b64str = b64encode(json.dumps(instructions).encode('utf-8')).decode('utf-8')
+
+    with open('id_rsa','r') as f:
+        private_key = RSA.import_key(f.read())
+    
+    digest = SHA256.new(b64str.encode('utf-8'))
+    signer = PKCS1_v1_5.new(private_key)
+    signature = b64encode(signer.sign(digest)).decode()
+
+    json_data = {'msg':b64str,'sig':signature}
+
+    res = requests.post(APP_URL + '/update-db',json=json_data)
+    if(res.status_code == 200):
+        print('Successfully uploaded to server.')
+    else:
+        print('Upload to server failed. Reason:',res.text)
+
 
 def get_gpinfo():
     headers = {
@@ -71,7 +102,7 @@ def get_gpinfo():
     pin = input('PIN: ').strip()
 
     data = {
-        'pin':int(pin),
+        'pin': pin,
         'stayLoggedIn':True,
         'pt':18126, #no idea what is this
         'screenId':'verify-phone',
@@ -117,10 +148,22 @@ def get_gpinfo():
     gpinfo['msisdn'] = msisdn
     gpinfo['me_ua'] = me_ua
 
-    with open('gpinfo.txt','w') as f:
-        f.write(b64encode(json.dumps(gpinfo).encode('utf-8')).decode('utf-8'))
-
     print(gpinfo)
 
+    save = confirm('Do you want to save the info as file?',default=False)
+    if(save):
+        gpinfo_b64 = b64encode(json.dumps(gpinfo).encode('utf-8')).decode('utf-8')
+        try:
+            with open('gpinfo.txt','w') as f:
+                f.write(gpinfo_b64)
+                print('Saved as gpinfo.txt in base64.')
+        except:
+            print('Failed to save file.')
+
+    save = confirm('Do you want to upload info to server?',default=True)
+    if(save):
+        upload_to_server(gpinfo)
+
 if __name__ == '__main__':
+    PHONE_NO = input('Enter Phone No: ').strip()
     get_gpinfo()

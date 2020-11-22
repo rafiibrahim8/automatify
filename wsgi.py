@@ -1,6 +1,12 @@
+from Crypto.Hash import SHA256
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.PublicKey import RSA
+
 from flask import Flask
 from flask import request as f_req
-from utils import db
+from utils import db, update_db
+from base64 import b64decode
+from json import loads
 from automatify_service_handler import handle_service
 from adata import do_corn
 
@@ -34,7 +40,7 @@ def sendMessage(text, msg_type='RESPONSE'):
 
     try:
         res = requests.post('https://graph.facebook.com/v8.0/me/messages', params=params, json=json)
-        print(res.text)
+        #print(res.text)
     except:
         pass
 
@@ -88,6 +94,23 @@ def corn_func():
         sendMessage(res[1],'UPDATE')
     return res[1]
 
+@app.route('/update-db', methods = ['POST'])
+def update_database():
+    try:
+        msg = f_req.get_json()['msg']
+        sig = f_req.get_json()['sig']
+    except:
+        return '403 - Forbidden', 403
+    
+    public_key = RSA.import_key(b64decode(os.environ['PUBLIC_KEY']))
+    verifier = PKCS1_v1_5.new(public_key)
+    digest = SHA256.new(msg.encode('utf-8'))
+
+    auth = verifier.verify(digest, b64decode(sig))
+    if(not auth):
+        return '403 - Forbidden', 403
+    return update_db(loads(b64decode(msg)))
+    
 threading.Thread(target=printIP).start()
 
 # run using: flask run

@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from json import dumps
 
 db = SQLAlchemy()
 
@@ -7,3 +8,22 @@ class Jsons(db.Model):
     name = db.Column(db.String, unique=True, nullable=False)
     jdata = db.Column(db.String, unique=False, nullable=False)
 
+def update_db(command):
+    try:
+        table = command['table']
+        name = command['name']
+        content = command['content']
+    except:
+        return 'Not Enough Data', 400
+    
+    if(table.lower() == 'jsons'):
+        result = Jsons.query.filter_by(name=name).first()
+        if(not result):
+            db.session.add(Jsons(name=name, jdata=dumps(content)))
+        else:
+            result.jdata = dumps(content)
+        db.session.commit()
+    else:
+        return 'Bad table name', 400
+    
+    return 'OK', 200
