@@ -86,7 +86,7 @@ def get_gpinfo():
 
     data = {
         'phone': PHONE_NO,
-        'stayLoggedI':True,
+        'stayLoggedIn':True,
         'pt':18185, #no idea what is this
         'screenId':'signin-switchable',
         'action':'next',
