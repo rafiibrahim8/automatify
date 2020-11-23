@@ -15,13 +15,12 @@ import re
 
 PHONE_NO = '01XXXXXXXXXX'
 APP_URL = 'https://automatify.herokuapp.com'
-# APP_URL = 'http://127.0.0.1:5000'
 
 def genID():
     s1s = sha1(str(random()).encode('utf-8')).hexdigest()
     return s1s[:8] + '-' + s1s[8:12] + '-' + s1s[12:16] + '-' + s1s[16:20] + '-' + s1s[20:32]
 
-def upload_to_server(content):
+def upload_to_server(content,url=APP_URL):
     instructions = {
         'table':'jsons',
         'name':'gpinfo',
@@ -39,7 +38,7 @@ def upload_to_server(content):
 
     json_data = {'msg':b64str,'sig':signature}
 
-    res = requests.post(APP_URL + '/update-db',json=json_data)
+    res = requests.post(url + '/update-db',json=json_data)
     if(res.status_code == 200):
         print('Successfully uploaded to server.')
     else:
