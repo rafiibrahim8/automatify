@@ -7,7 +7,7 @@ from flask import request as f_req
 from dbms import update, add_db, get_table
 from base64 import b64decode
 from json import loads,dumps
-from automatify_service_handler import handle_service
+from service_handler import handle_service
 from adata import do_corn
 
 import os
