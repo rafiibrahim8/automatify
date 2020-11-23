@@ -32,16 +32,13 @@ def query(cls,name):
     with app_.app_context():
         result = cls.query.filter_by(name=name).first()
         if(not result or not result.jdata):
-            'Not found', 404
+            return 'Not found', 404
         else:
             return result.jdata, 200
 
 def querys(table,name):
     q = query(table,name)
-    try:
-        return q[0] if(q[1]==200) else None
-    except:
-        return None 
+    return q[0] if(q[1]==200) else None
 
 def get_table(table):
     available_tables = {
