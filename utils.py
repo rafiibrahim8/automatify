@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from json import dumps
 
-db = SQLAlchemy()
+db = None
 
 class Jsons(db.Model):
     sl = db.Column(db.Integer, primary_key=True)
@@ -9,8 +9,10 @@ class Jsons(db.Model):
     jdata = db.Column(db.String, unique=False, nullable=False)
 
 def get_db(app=None):
+    global db
     if(app==None):
         return db
+    db = SQLAlchemy()
     db.init_app(app)
     with app.app_context():
         db.create_all()

@@ -77,7 +77,7 @@ def fb_hook_verify():
 @app.route('/fb-webhook', methods = ['POST'])
 def fb_hook_post():
     json_data = f_req.get_json()
-    #print('Received:',json_data)
+    print('Received:',json_data)
     if(json_data.get('object', None) == 'page'):
         t = threading.Thread(target=manage_hook_post,args=(json_data.get('entry',{}),))
         t.start()
