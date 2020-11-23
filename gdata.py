@@ -12,7 +12,8 @@ gpinfo = None
 
 def get_gpinfo():
     try:
-        from_db = loads(Jsons.query.filter_by(name='gpinfo').first().jdata)
+        with db.get_app().app_context():
+            from_db = loads(Jsons.query.filter_by(name='gpinfo').first().jdata)
         return from_db
     except:
         print(format_exc())
