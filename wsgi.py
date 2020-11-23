@@ -4,7 +4,7 @@ from Crypto.PublicKey import RSA
 
 from flask import Flask
 from flask import request as f_req
-from utils import db, update_db
+from utils import get_db, update_db
 from base64 import b64decode
 from json import loads
 from automatify_service_handler import handle_service
@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db.init_app(app)
+db = get_db()
 with app.app_context():
     db.create_all()
 

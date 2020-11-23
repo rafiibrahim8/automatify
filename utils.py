@@ -8,6 +8,10 @@ class Jsons(db.Model):
     name = db.Column(db.String, unique=True, nullable=False)
     jdata = db.Column(db.String, unique=False, nullable=False)
 
+def get_db(app):
+    db.init_app(app)
+    return db
+
 def update_db(command):
     try:
         table = command['table']
@@ -27,3 +31,5 @@ def update_db(command):
         return 'Bad table name', 400
     
     return 'OK', 200
+
+
