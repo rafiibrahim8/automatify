@@ -14,7 +14,7 @@ def get_gpinfo():
         print(format_exc())
         return {}
 
-def get_head_param(type_, gpinfo=None):
+def get_hp(type_, gpinfo=None):
     if(not gpinfo):
         gpinfo = get_gpinfo()
     if(type_.lower().startswith('h')):
@@ -44,10 +44,10 @@ def update_tokens(gpinfo=None):
         'Cache-Control': 'no-cache',
         'User-Agent': 'Android/22 MyGP/166 (en)'
     }
-    headers.update(get_head_param('h',gpinfo))
+    headers.update(get_hp('h',gpinfo))
     json_ = {'refresh_token': gpinfo['refresh_token']}
 
-    res = post('https://mygp.grameenphone.com/mygpapi/v2/oauth/connectid/refresh-token/android', headers=headers, json=json_, params=get_head_param('p',gpinfo))
+    res = post('https://mygp.grameenphone.com/mygpapi/v2/oauth/connectid/refresh-token/android', headers=headers, json=json_, params=get_hp('p',gpinfo))
     
     if(res.status_code == 200):
         json_ = res.json()
@@ -69,7 +69,7 @@ def update_tokens(gpinfo=None):
         print('Token update failed. Code:', res.status_code)
         print(res.text)
 
-def validate_tokens(gpinfo):
+def validate_tokens(gpinfo=None):
     if(not gpinfo):
         gpinfo = get_gpinfo()
     if(time()>float(gpinfo['expire_at'])):
@@ -83,16 +83,16 @@ def get_my_details():
         'User-Agent': 'Android/22 MyGP/166 (en) ID/'+ gpinfo['me_ua'],
     }
 
-    headers_me.update(get_head_param('h',gpinfo))
-    res = get('https://mygp.grameenphone.com/mygpapi/me',headers=headers_me,params=get_head_param('p',gpinfo)).json()
+    headers_me.update(get_hp('h',gpinfo))
+    res = get('https://mygp.grameenphone.com/mygpapi/me',headers=headers_me,params=get_hp('p',gpinfo)).json()
     return res
 
 def get_balance_raw():
     gpinfo = get_gpinfo()
-    validate_tokens()
+    validate_tokens(gpinfo)
     headers_bal = {'User-Agent': 'Android/22 MyGP/166 (en)'}
-    headers_bal.update(get_head_param('h',gpinfo))
-    res = get('https://mygp.grameenphone.com/mygpapi/balance',headers=headers_bal,params=get_head_param('p',gpinfo)).json()
+    headers_bal.update(get_hp('h',gpinfo))
+    res = get('https://mygp.grameenphone.com/mygpapi/balance',headers=headers_bal,params=get_hp('p',gpinfo)).json()
     return res
 
 def get_formated_data_bal():
