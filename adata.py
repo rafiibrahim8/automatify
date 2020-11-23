@@ -1,5 +1,7 @@
 from traceback import format_exc
 from requests import Session
+from json import loads,dumps
+from dbms import update,querys,Jsons
 import os
 
 WARN_DATA_LOW = 512.0
@@ -7,7 +9,6 @@ AIRTEL_LOGIN_DASHBOARD_URL = 'https://www.bd.airtel.com/en/auth/login?redirectTo
 AIRTEL_LOGIN_URL = 'https://api.bd.airtel.com/v1/account/login/facebook'                            #POST
 
 session = None
-data_warn = False
 airtel_auth_session = None
 
 def init_session():
@@ -93,7 +94,7 @@ def get_detail_text(res=None):
     return res
 
 def do_corn():
-    global data_warn
+    data_warn =  querys(Jsons,'adata_warn')
     info = get_raw_res()
     try:
         remaining = float(info['total'] - info['usage'])
@@ -102,10 +103,10 @@ def do_corn():
         return (2, 'Logged out\r\n')
     if(remaining < float(os.environ.get('AIRTEL_WARN_DATA_LOW', WARN_DATA_LOW))):
         if(not data_warn):
-            data_warn = True
+            update(Jsons,'adata_warn',True)
             return (1, 'Your data pack is about to finish.\n\n' + get_detail_text(info))
         else:
             return (0, 'Corn Done :)\r\n')
     else:
-        data_warn = False
+        update(Jsons,'adata_warn',False)
         return (0, 'Corn Done :)\r\n')

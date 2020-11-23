@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from json import dumps
 
 db = SQLAlchemy()
 app_ = None
@@ -15,27 +16,35 @@ def add_db(app):
     with app_.app_context():
         db.create_all()
 
-def update(table,name,content):
-    if(table.lower() == 'jsons'):
-        with app_.app_context():
-            result = Jsons.query.filter_by(name=name).first()
-            if(not result):
-                db.session.add(Jsons(name=name, jdata=content))
-            else:
-                result.jdata = content
-            db.session.commit()
-    else:
-        return 'Bad table name', 400
-    
+def update(cls,name,content):
+    if(not isinstance(content,str)):
+        content = dumps(content)
+    with app_.app_context():
+        result = cls.query.filter_by(name=name).first()
+        if(not result):
+            db.session.add(cls(name=name, jdata=content))
+        else:
+            result.jdata = content
+        db.session.commit()
     return 'OK', 200
 
-def query(table,name):
-    if(table.lower() == 'jsons'):
-        with app_.app_context():
-            result = Jsons.query.filter_by(name=name).first()
-            if(not result):
-                'Name not found', 404
-            else:
-                return result.jdata, 200
-    else:
-        return 'Bad table name', 400
+def query(cls,name):
+    with app_.app_context():
+        result = cls.query.filter_by(name=name).first()
+        if(not result or not result.jdata):
+            'Not found', 404
+        else:
+            return result.jdata, 200
+
+def querys(table,name):
+    q = query(table,name)
+    try:
+        return q[0] if(q[1]==200) else None
+    except:
+        return None 
+
+def get_table(table):
+    available_tables = {
+        'jsons' : Jsons
+    }
+    return available_tables.get(table)

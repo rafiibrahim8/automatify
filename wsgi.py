@@ -4,7 +4,7 @@ from Crypto.PublicKey import RSA
 
 from flask import Flask
 from flask import request as f_req
-from dbms import update, add_db
+from dbms import update, add_db, get_table
 from base64 import b64decode
 from json import loads,dumps
 from automatify_service_handler import handle_service
@@ -77,7 +77,7 @@ def fb_hook_verify():
 @app.route('/fb-webhook', methods = ['POST'])
 def fb_hook_post():
     json_data = f_req.get_json()
-    print('Received:',json_data)
+    #print('Received:',json_data)
     if(json_data.get('object', None) == 'page'):
         t = threading.Thread(target=manage_hook_post,args=(json_data.get('entry',{}),))
         t.start()
@@ -114,6 +114,10 @@ def update_database():
         content =  dumps(command['content'])
     except:
         return 'Not Enough Data', 400
+    
+    table = get_table(table)
+    if(not table):
+        return 'Bad table name', 400
     
     return update(table,name,content)
     

@@ -1,7 +1,7 @@
 from requests import get, post
 from json import loads, dumps
 from base64 import b64decode
-from dbms import query,update
+from dbms import query,update,Jsons
 from time import time
 from traceback import format_exc
 import os
@@ -12,7 +12,7 @@ gpinfo = None
 
 def get_gpinfo():
     try:
-        from_db = loads(query('jsons','gpinfo')[0])
+        from_db = loads(query(Jsons,'gpinfo')[0])
         return from_db
     except:
         print(format_exc())
@@ -58,7 +58,7 @@ def update_tokens():
             pass
         gpinfo.update(json_)
         
-        result = update('jsons','gpinfo',dumps(gpinfo))
+        result = update(Jsons,'gpinfo',dumps(gpinfo))
         if(result[1]==200):
             print('DB update successful.')
         else:
