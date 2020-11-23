@@ -10,6 +10,8 @@ class Jsons(db.Model):
 
 def get_db(app):
     db.init_app(app)
+    with app.app_context():
+        db.create_all()
     return db
 
 def update_db(command):

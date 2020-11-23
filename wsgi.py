@@ -18,9 +18,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = get_db()
-with app.app_context():
-    db.create_all()
+db = get_db(app)
 
 def printIP():
     try:
