@@ -102,6 +102,8 @@ def get_formated_data_bal():
         msg = 'Total Balance: '+total['value'] + ' ' + total['unit']
 
         for p in raw_bal['internet_packs']:
+            if(int(p['value'].split(' ')[0])==0):
+                continue
             m = '\n\nPack: {}\n'.format(p['name']) + \
                 'Remaining: {}\n'.format(p['value']) + \
                 'Validity: {}'.format(p['remaining'])
