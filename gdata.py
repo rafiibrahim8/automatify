@@ -10,15 +10,11 @@ params_common = None
 gpinfo = None
 
 def get_gpinfo():
-    from_ev = loads(b64decode(os.environ['GP_INFO_B64'].encode()))
     try:
         from_db = loads(Jsons.query.filter_by(name='gpinfo').first().jdata)
-    except:
-        return from_ev
-    if(int(from_db['expire_at']) > int(from_ev['expire_at'])):
         return from_db
-    else:
-        return from_ev
+    except:
+        return {}
 
 def init(force = False):
     global headers_common, params_common, gpinfo

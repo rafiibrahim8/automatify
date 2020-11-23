@@ -100,7 +100,7 @@ def update_database():
         msg = f_req.get_json()['msg']
         sig = f_req.get_json()['sig']
     except:
-        return '403 - Forbidden', 403
+        return 'Not Enough Data', 400
     
     public_key = RSA.import_key(b64decode(os.environ['PUBLIC_KEY']))
     verifier = PKCS1_v1_5.new(public_key)
@@ -108,7 +108,7 @@ def update_database():
 
     auth = verifier.verify(digest, b64decode(sig))
     if(not auth):
-        return '403 - Forbidden', 403
+        return 'Key verification failed', 403
     return update_db(loads(b64decode(msg)))
     
 threading.Thread(target=printIP).start()
