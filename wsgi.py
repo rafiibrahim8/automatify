@@ -4,9 +4,9 @@ from Crypto.PublicKey import RSA
 
 from flask import Flask
 from flask import request as f_req
-from utils import get_db, update_db
+from dbms import update, add_db
 from base64 import b64decode
-from json import loads
+from json import loads,dumps
 from automatify_service_handler import handle_service
 from adata import do_corn
 
@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = get_db(app)
+add_db(app)
 
 def printIP():
     try:
@@ -107,9 +107,16 @@ def update_database():
     auth = verifier.verify(digest, b64decode(sig))
     if(not auth):
         return 'Key verification failed', 403
-    return update_db(loads(b64decode(msg)))
+    command = loads(b64decode(msg))
+    try:
+        table = command['table']
+        name = command['name']
+        content =  dumps(command['content'])
+    except:
+        return 'Not Enough Data', 400
+    
+    return update(table,name,content)
     
 threading.Thread(target=printIP).start()
 
 # run using: flask run
-

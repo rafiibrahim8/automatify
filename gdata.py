@@ -1,7 +1,7 @@
 from requests import get, post
 from json import loads, dumps
 from base64 import b64decode
-from utils import get_db, Jsons
+from dbms import query,update
 from time import time
 from traceback import format_exc
 import os
@@ -9,13 +9,10 @@ import os
 headers_common = None
 params_common = None
 gpinfo = None
-db = None
 
 def get_gpinfo():
-    db = get_db()
     try:
-        with db.get_app().app_context():
-            from_db = loads(Jsons.query.filter_by(name='gpinfo').first().jdata)
+        from_db = loads(query('jsons','gpinfo')[0])
         return from_db
     except:
         print(format_exc())
@@ -60,12 +57,12 @@ def update_tokens():
         except:
             pass
         gpinfo.update(json_)
-        result = Jsons.query.filter_by(name='gpinfo').first()
-        if(not result):
-            db.session.add(Jsons(name='gpinfo', jdata=dumps(gpinfo)))
+        
+        result = update('jsons','gpinfo',dumps(gpinfo))
+        if(result[1]==200):
+            print('DB update successful.')
         else:
-            result.jdata = dumps(gpinfo)
-        db.session.commit()
+            print('DB update failed.')
     else:
         print('Token update failed. Code:', res.status_code)
         print(res.text)
