@@ -8,7 +8,9 @@ class Jsons(db.Model):
     name = db.Column(db.String, unique=True, nullable=False)
     jdata = db.Column(db.String, unique=False, nullable=False)
 
-def get_db(app):
+def get_db(app=None):
+    if(app==None):
+        return db
     db.init_app(app)
     with app.app_context():
         db.create_all()

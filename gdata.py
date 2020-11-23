@@ -1,7 +1,7 @@
 from requests import get, post
 from json import loads, dumps
 from base64 import b64decode
-from utils import db, Jsons
+from utils import get_db, Jsons
 from time import time
 from traceback import format_exc
 import os
@@ -9,8 +9,10 @@ import os
 headers_common = None
 params_common = None
 gpinfo = None
+db = None
 
 def get_gpinfo():
+    db = get_db()
     try:
         with db.get_app().app_context():
             from_db = loads(Jsons.query.filter_by(name='gpinfo').first().jdata)
