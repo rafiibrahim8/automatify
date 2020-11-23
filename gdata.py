@@ -6,10 +6,6 @@ from time import time
 from traceback import format_exc
 import os
 
-headers_common = None
-params_common = None
-gpinfo = None
-
 def get_gpinfo():
     try:
         from_db = loads(query(Jsons,'gpinfo')[0])
@@ -18,34 +14,40 @@ def get_gpinfo():
         print(format_exc())
         return {}
 
-def init(force = False):
-    global headers_common, params_common, gpinfo
+def get_head_param(type_, gpinfo=None):
     if(not gpinfo):
         gpinfo = get_gpinfo()
-    if(force or not headers_common):
+    if(type_.lower().startswith('h')):
         headers_common = {
-            'Accept-Language': 'en',
-            'Vary': 'Accept-Language',
-            'Authorization': 'Bearer '+ gpinfo['access_token'],
-            'Connection': 'close',
-            'Accept-Encoding': 'gzip, deflate'
-        }
-    if(force or not params_common):
+                'Accept-Language': 'en',
+                'Vary': 'Accept-Language',
+                'Authorization': 'Bearer '+ gpinfo['access_token'],
+                'Connection': 'close',
+                'Accept-Encoding': 'gzip, deflate'
+            }
+        return headers_common
+    
+    elif(type_.lower().startswith('p')):
         params_common = {
             'hash': gpinfo['hash'],
             'lang':'en',
             'id': gpinfo['id']
         }
+        return params_common
+    else:
+        raise TypeError('Must be headers or params.')
 
-def update_tokens():
+def update_tokens(gpinfo=None):
+    if(not gpinfo):
+        gpinfo = get_gpinfo()
     headers = {
         'Cache-Control': 'no-cache',
         'User-Agent': 'Android/22 MyGP/166 (en)'
     }
-    headers.update(headers_common)
+    headers.update(get_head_param('h',gpinfo))
     json_ = {'refresh_token': gpinfo['refresh_token']}
 
-    res = post('https://mygp.grameenphone.com/mygpapi/v2/oauth/connectid/refresh-token/android', headers=headers, json=json_, params=params_common)
+    res = post('https://mygp.grameenphone.com/mygpapi/v2/oauth/connectid/refresh-token/android', headers=headers, json=json_, params=get_head_param('p',gpinfo))
     
     if(res.status_code == 200):
         json_ = res.json()
@@ -67,28 +69,30 @@ def update_tokens():
         print('Token update failed. Code:', res.status_code)
         print(res.text)
 
-def validate_tokens():
-    init()
+def validate_tokens(gpinfo):
+    if(not gpinfo):
+        gpinfo = get_gpinfo()
     if(time()>float(gpinfo['expire_at'])):
-        update_tokens()
-        init(force=True)
+        update_tokens(gpinfo)
 
 def get_my_details():
-    validate_tokens()
+    gpinfo = get_gpinfo()
+    validate_tokens(gpinfo)
     headers_me = {
         'NOTFIRST': '1',
         'User-Agent': 'Android/22 MyGP/166 (en) ID/'+ gpinfo['me_ua'],
     }
 
-    headers_me.update(headers_common)
-    res = get('https://mygp.grameenphone.com/mygpapi/me',headers=headers_me,params=params_common).json()
+    headers_me.update(get_head_param('h',gpinfo))
+    res = get('https://mygp.grameenphone.com/mygpapi/me',headers=headers_me,params=get_head_param('p',gpinfo)).json()
     return res
 
 def get_balance_raw():
+    gpinfo = get_gpinfo()
     validate_tokens()
     headers_bal = {'User-Agent': 'Android/22 MyGP/166 (en)'}
-    headers_bal.update(headers_common)
-    res = get('https://mygp.grameenphone.com/mygpapi/balance',headers=headers_bal,params=params_common).json()
+    headers_bal.update(get_head_param('h',gpinfo))
+    res = get('https://mygp.grameenphone.com/mygpapi/balance',headers=headers_bal,params=get_head_param('p',gpinfo)).json()
     return res
 
 def get_formated_data_bal():
