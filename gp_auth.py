@@ -14,8 +14,8 @@ import json
 import re
 
 PHONE_NO = '01XXXXXXXXXX'
-#APP_URL = 'https://automatify.herokuapp.com'
-APP_URL = 'http://127.0.0.1:5000'
+APP_URL = 'https://automatify.herokuapp.com'
+# APP_URL = 'http://127.0.0.1:5000'
 
 def genID():
     s1s = sha1(str(random()).encode('utf-8')).hexdigest()
