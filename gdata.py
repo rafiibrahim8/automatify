@@ -1,14 +1,14 @@
 from requests import get, post
 from json import loads, dumps
 from base64 import b64decode
-from dbms import query,update,Jsons
+from dbms import querys,update,Jsons
 from time import time
 from traceback import format_exc
 import os
 
 def get_gpinfo():
     try:
-        from_db = loads(query(Jsons,'gpinfo')[0])
+        from_db = loads(querys(Jsons,'gpinfo'))
         return from_db
     except:
         print(format_exc())
