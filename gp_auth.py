@@ -12,9 +12,10 @@ from click import confirm
 import requests
 import json
 import re
+import os
 
 PHONE_NO = '01XXXXXXXXXX'
-APP_URL = 'https://automatify.herokuapp.com'
+APP_URL = os.environ.get('APP_URL','https://automatify.herokuapp.com')
 
 def genID():
     s1s = sha1(str(random()).encode('utf-8')).hexdigest()

@@ -3,6 +3,7 @@ from json import loads, dumps
 from base64 import b64decode
 from utils import db, Jsons
 from time import time
+from traceback import format_exc
 import os
 
 headers_common = None
@@ -14,6 +15,7 @@ def get_gpinfo():
         from_db = loads(Jsons.query.filter_by(name='gpinfo').first().jdata)
         return from_db
     except:
+        print(format_exc())
         return {}
 
 def init(force = False):
@@ -103,4 +105,5 @@ def get_formated_data_bal():
 
         return msg
     except:
+        print(format_exc())
         return 'Something went wrong.\n\n' + str(raw_bal)
