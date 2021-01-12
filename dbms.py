@@ -91,7 +91,7 @@ def get_type(table):
 
 def map_fbid_to_user(fbid):
     with app_.app_context():
-        document = Users.objects(field='fbid',data=fbid).first()
+        document = Users.objects(field='fbid',data={os.environ['DB_X_SECRET']: fbid}).first()
         if(not document):
             return None
         else:
