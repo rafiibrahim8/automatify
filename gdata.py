@@ -1,14 +1,14 @@
 from requests import get, post
 from json import loads, dumps
 from base64 import b64decode
-from dbms import querys,update,Jsons
+from dbms import querys,update,Users
 from time import time
 from traceback import format_exc
 import os
 
 def get_gpinfo():
     try:
-        from_db = loads(querys(Jsons,'gpinfo'))
+        from_db = loads(querys(Users,'gpinfo'))
         return from_db
     except:
         print(format_exc())
@@ -60,7 +60,7 @@ def update_tokens(gpinfo=None):
             pass
         gpinfo.update(json_)
         
-        result = update(Jsons,'gpinfo',dumps(gpinfo))
+        result = update(Users,'gpinfo',dumps(gpinfo))
         if(result[1]==200):
             print('DB update successful.')
         else:
@@ -95,7 +95,7 @@ def get_balance_raw():
     res = get('https://mygp.grameenphone.com/mygpapi/balance',headers=headers_bal,params=get_hp('p',gpinfo)).json()
     return res
 
-def get_formated_data_bal():
+def detail_text(user):
     try:
         raw_bal = get_balance_raw()
         total = raw_bal['internet_details']
@@ -109,7 +109,7 @@ def get_formated_data_bal():
                 'Validity: {}'.format(p['remaining'])
             msg += m
 
-        return msg
+        return msg, 200
     except:
         print(format_exc())
-        return 'Something went wrong.\n\n' + str(raw_bal)
+        return 'Something went wrong.\n\n' + str(raw_bal), 200

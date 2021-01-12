@@ -1,6 +1,5 @@
 Flask
 gunicorn
 requests
-Flask-SQLAlchemy
-psycopg2
+flask-mongoengine
 pycryptodome

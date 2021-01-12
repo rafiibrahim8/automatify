@@ -1,65 +1,30 @@
-from Crypto.Hash import SHA256
-from Crypto.Signature import PKCS1_v1_5
-from Crypto.PublicKey import RSA
-
 from flask import Flask
 from flask import request as f_req
-from dbms import update, add_db, get_table
+from dbms import add_db
+from helper import update_h, delete_h, info_h
 from base64 import b64decode
 from json import loads,dumps
-from service_handler import handle_service
+from service_handler import manage_hook_post, sendMessage
 from adata import do_corn
 
 import os
-import requests
 import threading
 
-##
+FB_WEBHOOK_PATH = '/' + os.environ['FB_WEBHOOK_PATH']
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+app.config['MONGODB_DB'] = 'automatify'
 add_db(app)
-
-def printIP():
-    try:
-        print('Server IP:',requests.get('https://ifconfig.me').text)
-    except:
-        print('Can not get server IP.')
-
-def sendMessage(text, msg_type='RESPONSE'):
-    json = {
-        'messaging_type': msg_type,
-        'recipient':{'id': os.environ['MY_PSID']},
-        'message':{
-            'text': text
-            }
-        }
-    params =  { 'access_token': os.environ['FB_PAGE_ACCESS_TOKEN'] }
-
-    try:
-        res = requests.post('https://graph.facebook.com/v8.0/me/messages', params=params, json=json)
-        #print(res.text)
-    except:
-        pass
-
-def manage_hook_post(data):
-    for d in data:
-        for i in d['messaging']:
-            try:
-                if (i['message'] and i['message']['text'] and i['sender']['id'] == os.environ['MY_PSID']):
-                    res = handle_service(i['message']['text'])
-                    if(res != None):
-                        sendMessage(res)
-            except:
-                break
 
 @app.route("/")
 def hello():
     return "I am doing something in the background!"
 
-@app.route('/fb-webhook', methods = ['GET'])
+@app.route("/robots.txt")
+def robots_txt():
+    return "User-agent: *\nDisallow: /\n"
+
+@app.route(FB_WEBHOOK_PATH, methods = ['GET'])
 def fb_hook_verify():
     VERIFY_TOKEN = os.environ['FB_VERIFY_TOKEN']
     mode = f_req.args.get('hub.mode')
@@ -74,9 +39,9 @@ def fb_hook_verify():
             return challenge
         return '403 - Forbidden', 403
     else:
-        return 'Invalid mode'
+        return 'Invalid mode', 400
 
-@app.route('/fb-webhook', methods = ['POST'])
+@app.route(FB_WEBHOOK_PATH, methods = ['POST'])
 def fb_hook_post():
     json_data = f_req.get_json()
     #print('Received:',json_data)
@@ -87,42 +52,23 @@ def fb_hook_post():
     else:
         return '404 - Not Found', 404
 
-@app.route('/corn', methods = ['GET'])
-def corn_func():
+@app.route('/update', methods = ['POST'])
+def update():
+    return update_h(f_req.get_json())
+
+@app.route('/delete', methods = ['POST'])
+def delete():
+    return delete_h(f_req.get_json())
+
+@app.route('/info', methods = ['POST'])
+def info():
+    return info_h(f_req.get_json())
+
+@app.route('/cron', methods = ['GET'])
+def cron_func():
     res = do_corn()
     if(res[0] == 1):
         sendMessage(res[1],'UPDATE')
     return res[1]
-
-@app.route('/update-db', methods = ['POST'])
-def update_database():
-    try:
-        msg = f_req.get_json()['msg']
-        sig = f_req.get_json()['sig']
-    except:
-        return 'Not Enough Data', 400
-    
-    public_key = RSA.import_key(b64decode(os.environ['PUBLIC_KEY']))
-    verifier = PKCS1_v1_5.new(public_key)
-    digest = SHA256.new(msg.encode('utf-8'))
-
-    auth = verifier.verify(digest, b64decode(sig))
-    if(not auth):
-        return 'Key verification failed', 403
-    command = loads(b64decode(msg))
-    try:
-        table = command['table']
-        name = command['name']
-        content =  dumps(command['content'])
-    except:
-        return 'Not Enough Data', 400
-    
-    table = get_table(table)
-    if(not table):
-        return 'Bad table name', 400
-    
-    return update(table,name,content)
-    
-threading.Thread(target=printIP).start()
 
 # run using: flask run

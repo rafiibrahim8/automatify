@@ -5,3 +5,4 @@ gpinfo.txt
 *.db
 .env
 id_rsa
+cmd_apps_dev

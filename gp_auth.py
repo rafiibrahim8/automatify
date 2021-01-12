@@ -13,8 +13,11 @@ import requests
 import json
 import re
 
+USER = 'ibrahim'
+ADMIN = True
 PHONE_NO = '01XXXXXXXXXX'
 APP_URL = 'https://automatify.herokuapp.com'
+APP_URL = 'http://127.0.0.1:65003'
 
 def genID():
     s1s = sha1(str(random()).encode('utf-8')).hexdigest()
@@ -22,7 +25,6 @@ def genID():
 
 def upload_to_server(content,url=APP_URL):
     instructions = {
-        'table':'jsons',
         'name':'gpinfo',
         'content': content
     }
@@ -36,9 +38,9 @@ def upload_to_server(content,url=APP_URL):
     signer = PKCS1_v1_5.new(private_key)
     signature = b64encode(signer.sign(digest)).decode()
 
-    json_data = {'msg':b64str,'sig':signature}
+    json_data = {'msg':b64str,'sig':signature,'user': USER,'admin': ADMIN}
 
-    res = requests.post(url + '/update-db',json=json_data)
+    res = requests.post(url + '/update-jsons',json=json_data)
     if(res.status_code == 200):
         print('Successfully uploaded to server.')
     else:
