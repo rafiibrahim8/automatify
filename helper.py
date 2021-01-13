@@ -6,7 +6,10 @@ from dbms import update, get_type, get_pbkey, delete_self, delete_all, delete_fi
 from service_handler import get_service
 from json import loads
 import os
+import time
 from traceback import print_exc
+
+TIME_THRESHOLD = 10
 
 def resolve_crypto(jdata):
     try:
@@ -23,15 +26,25 @@ def resolve_crypto(jdata):
     except:
         print_exc()
         return 'Bad request', 400
-
-    return ("Granted", 200) if(auth) else ("Key verification failed.", 403)
+    if(not auth):
+        return "Key verification failed.", 403
+    try:
+        body = loads(b64decode(jdata['body']))
+        t = abs(int(body.get('time',0)))
+        if(int(time.time()) - t < TIME_THRESHOLD):
+            return body, 200
+        else:
+            return 'Time not in sync', 403
+    except:
+        pass
+    return 'Bad request', 400
 
 def update_h(jdata):
     cryp_r = resolve_crypto(jdata)
     if(cryp_r[1] != 200):
         return cryp_r
+    body = cryp_r[0]
     try:
-        body = loads(b64decode(jdata['body']))
         user = jdata['user']
         u_type = body['type']
         u_data = body['data']
@@ -51,8 +64,8 @@ def delete_h(jdata):
     cryp_r = resolve_crypto(jdata)
     if(cryp_r[1] != 200):
         return cryp_r
+    body = cryp_r[0]
     try:
-        body = jdata['body']
         sig = jdata['sig']
         user = jdata['user']
         delete = body['delete']
@@ -78,12 +91,11 @@ def info_h(jdata):
     cryp_r = resolve_crypto(jdata)
     if(cryp_r[1] != 200):
         return cryp_r
+    body = cryp_r[0]
     try:
-        body = loads(b64decode(jdata['body']))
         user = jdata['user']
         service = body['service']
     except:
         return 'Bad Request', 400
 
     return get_info(user, service)
-
