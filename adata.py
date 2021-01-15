@@ -26,9 +26,10 @@ def refresh_token(session,user):
             'email':None,
             'provider':'facebook'
         }
-
-        if(not session.cookies.get_dict().get('airtel_website_session')):
-            session.get(AIRTEL_LOGIN_DASHBOARD_URL) # fetch 'airtel_website_session' cookies if not present.
+        cookies = session.cookies.get_dict()
+        cookies.pop('airtel_website_session')
+        session.cookies = requests.utils.cookiejar_from_dict(cookies)
+        session.get(AIRTEL_LOGIN_DASHBOARD_URL) # refresh 'airtel_website_session'.
         
         airtel_website_session = session.cookies.get_dict()['airtel_website_session']
         airtel_headers = {
